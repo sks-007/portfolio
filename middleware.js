@@ -14,8 +14,8 @@ export function middleware(req) {
       const user = decodedValue.substring(0, splitIndex);
       const pwd = decodedValue.substring(splitIndex + 1);
 
-      const validUser = process.env.ADMIN_USERNAME || 'sachin';
-      const validPass = process.env.ADMIN_PASSWORD || 'sachin123';
+      const validUser = process.env.ADMIN_USERNAME;
+      const validPass = process.env.ADMIN_PASSWORD;
 
       if (user === validUser && pwd === validPass) {
         return NextResponse.next();
