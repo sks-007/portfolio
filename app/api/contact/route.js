@@ -26,6 +26,29 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
     }
 
+    // Send email using nodemailer
+    try {
+      const nodemailer = require('nodemailer');
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER, // Your gmail address
+          pass: process.env.EMAIL_PASS  // Your gmail App Password
+        }
+      });
+
+      await transporter.sendMail({
+        from: `"${name}" <${process.env.EMAIL_USER}>`,
+        to: 'kumarsinghsachin4444@gmail.com', // Your receiving email
+        subject: `New Portfolio Message: ${subject}`,
+        text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+        replyTo: email
+      });
+    } catch (mailError) {
+      console.error('Email sending failed (but saved to DB):', mailError);
+      // We still return success because it's safely stored in the Supabase DB / Admin Panel
+    }
+
     return NextResponse.json({ success: true, message: 'Message sent successfully!', id: data.id }, { status: 201 });
   } catch (err) {
     const isNetworkError = err.message?.includes('fetch failed') || err.message?.includes('ENOTFOUND');
