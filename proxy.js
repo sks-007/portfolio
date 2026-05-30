@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
 
 export function proxy(req) {
+  const url = req.nextUrl;
+  
+  // Determine if this route requires authentication
+  const isAdminRoute = url.pathname.startsWith('/admin');
+  
+  // Protect all API routes that modify data (POST, PUT, DELETE), EXCEPT the contact form
+  const isProtectedApi = 
+    url.pathname.startsWith('/api') && 
+    req.method !== 'GET' && 
+    !url.pathname.startsWith('/api/contact');
+
+  // If it's a public route, just let it pass immediately
+  if (!isAdminRoute && !isProtectedApi) {
+    return NextResponse.next();
+  }
+
+  // Check credentials for protected routes
   const basicAuth = req.headers.get('authorization');
 
   if (basicAuth) {
     const authValue = basicAuth.split(' ')[1];
-    // Use Buffer for base64 decoding (more reliable in Edge runtime than atob)
     const decodedValue = Buffer.from(authValue, 'base64').toString('utf-8');
     
-    // Split by the FIRST colon only (in case password has special characters)
     const splitIndex = decodedValue.indexOf(':');
     if (splitIndex !== -1) {
       const user = decodedValue.substring(0, splitIndex);
@@ -23,6 +38,7 @@ export function proxy(req) {
     }
   }
 
+  // Deny access
   return new NextResponse('Authentication Required', {
     status: 401,
     headers: {
@@ -32,5 +48,6 @@ export function proxy(req) {
 }
 
 export const config = {
-  matcher: ['/admin', '/admin/:path*'],
+  // Apply proxy to all admin AND all api routes so we can filter them inside the function
+  matcher: ['/admin', '/admin/:path*', '/api/:path*'],
 };
