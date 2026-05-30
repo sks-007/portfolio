@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "icon": "bi-cpu",
+    "name": "Oracle Cloud Infrastructure 2025 Certified Generative AI Professional",
+    "issuer": "Oracle",
+    "date": "Aug 2025",
+    "color": "#e6f0ff",
+    "iconColor": "#0066cc",
+    "desc": "Validates expertise in LLMs, OCI Generative AI Service, RAG, Semantic Search, Vector Databases, and LangChain.",
+    "link": "https://catalog-education.oracle.com/ords/certview/sharebadge?id=DB1378EE53B86036EC5B9251C2F82FE78969183E23DD24D24ED6ECFE786F7101"
+  },
+  {
+    "id": 2,
+    "icon": "bi-cloud-check",
+    "name": "Oracle Cloud Infrastructure 2025 Certified AI Foundations Associate",
+    "issuer": "Oracle",
+    "date": "Jul 2025",
+    "color": "#e6f0ff",
+    "iconColor": "#0066cc",
+    "desc": "Covers AI/ML fundamentals, neural networks, generative AI, OCI AI services, ethical AI, and model lifecycle.",
+    "link": "https://catalog-education.oracle.com/ords/certview/sharebadge?id=CB1F9158F070CD3CB037E1D35DB6ADF8832DEB982C7F41B310C0E0946382B4F0"
+  },
+  {
+    "id": 3,
+    "icon": "bi-graph-up-arrow",
+    "name": "McKinsey.Org Forward Program",
+    "issuer": "McKinsey & Company",
+    "date": "Apr – Jun 2025",
+    "color": "#fef3e2",
+    "iconColor": "#d97706",
+    "desc": "Future-ready professional skills: structured thinking, adaptability, digital tools, and real-world business scenarios.",
+    "link": "https://www.credly.com/badges/e6ebceb9-9f7c-4c2d-9fef-55ada694156d/linked_in_profile"
+  },
+  {
+    "id": 4,
+    "icon": "bi-filetype-py",
+    "name": "Python Pro Bootcamp",
+    "issuer": "Udemy",
+    "date": "Feb – May 2025",
+    "color": "#f0fdf4",
+    "iconColor": "#16a34a",
+    "desc": "Python fundamentals, data types, control flow, OOP, data structures, and mini-projects for real-world applications.",
+    "link": "https://ude.my/UC-39c6ebae-c2f5-45bf-ae1f-056a084db810"
+  }
+]

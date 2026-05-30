@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "name": "Netflix Movie Recommendation System",
+    "category": "ai-ml",
+    "categoryLabel": "AI / ML",
+    "desc": "Content-based filtering system that suggests movies using cosine similarity and vectorization on genre, cast, and keywords.",
+    "tags": [
+      "Python",
+      "Scikit-learn",
+      "Pandas",
+      "NumPy"
+    ],
+    "image": "/netflix.jpg",
+    "github": "https://github.com/sks-007/Netflix-Movie-Recommendation-system",
+    "demo": "https://netflix-movie-recommendation-system-f1ac.onrender.com/"
+  },
+  {
+    "id": 2,
+    "name": "EzyExplore – Smart Travel Platform",
+    "category": "web",
+    "categoryLabel": "Web Dev",
+    "desc": "Full-stack travel platform helping users discover safe, reliable destinations with dynamic content and responsive design.",
+    "tags": [
+      "Node.js",
+      "MongoDB",
+      "Express",
+      "JavaScript"
+    ],
+    "image": "/EzyExplore.jpg",
+    "github": "",
+    "demo": ""
+  },
+  {
+    "id": 3,
+    "name": "PolicyPulse – Sentiment Analysis",
+    "category": "ai-ml",
+    "categoryLabel": "AI / ML",
+    "desc": "NLP-powered sentiment analysis system that classifies public opinions on policies as positive, negative, or neutral.",
+    "tags": [
+      "Python",
+      "NLP",
+      "Hugging Face",
+      "ML"
+    ],
+    "image": "/Policy.jpg",
+    "github": "",
+    "demo": ""
+  },
+  {
+    "id": 4,
+    "name": "House Price Prediction Model",
+    "category": "ai-ml",
+    "categoryLabel": "AI / ML",
+    "desc": "Regression model that estimates property prices based on location, size, and other key features using supervised learning.",
+    "tags": [
+      "Python",
+      "Scikit-learn",
+      "Pandas",
+      "EDA"
+    ],
+    "image": "/House Price.jpg",
+    "github": "",
+    "demo": ""
+  }
+]
