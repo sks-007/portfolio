@@ -9,6 +9,7 @@ const NAV = [
   { id: 'blog',      label: 'Blog Posts',      icon: 'bi-file-earmark-text' },
   { id: 'projects',  label: 'Projects',        icon: 'bi-grid-3x3-gap' },
   { id: 'certs',     label: 'Certifications',  icon: 'bi-patch-check' },
+  { id: 'domains',   label: 'Domains',         icon: 'bi-tags' },
   { id: 'experience',label: 'Experience',      icon: 'bi-briefcase' },
   { id: 'education', label: 'Education',       icon: 'bi-book' },
   { id: 'resume',    label: 'Resume',          icon: 'bi-file-person' },
@@ -195,6 +196,14 @@ export default function AdminPage() {
   const [eduStatus, setEduStatus]   = useState(null);
   const [eduBusy, setEduBusy]       = useState(false);
 
+  // Domains
+  const [domains, setDomains]               = useState([]);
+  const [domainsLoading, setDomainsLoading] = useState(true);
+  const [domainView, setDomainView]       = useState('list');
+  const [newDomain, setNewDomain]         = useState({ value: '', label: '' });
+  const [domainStatus, setDomainStatus]   = useState(null);
+  const [domainBusy, setDomainBusy]       = useState(false);
+
   // Resume
   const [resumeUrl, setResumeUrl]   = useState('/Sachin_Kumar_Singh_Resume.pdf');
   const [newUrl, setNewUrl]         = useState('');
@@ -208,8 +217,9 @@ export default function AdminPage() {
   const fetchResume   = () => { fetch('/api/resume').then(r=>r.json()).then(d=>setResumeUrl(d.resumeUrl||'/Sachin_Kumar_Singh_Resume.pdf')).catch(()=>{}); };
   const fetchExp      = () => { setExpLoading(true);    fetch('/api/experience').then(r=>r.json()).then(d=>{ setExp(d.experience||[]); setExpLoading(false); }).catch(()=>setExpLoading(false)); };
   const fetchEdu      = () => { setEduLoading(true);    fetch('/api/education').then(r=>r.json()).then(d=>{ setEdu(d.education||[]); setEduLoading(false); }).catch(()=>setEduLoading(false)); };
+  const fetchDomains  = () => { setDomainsLoading(true); fetch('/api/domains').then(r=>r.json()).then(d=>{ setDomains(d.domains||[]); setDomainsLoading(false); }).catch(()=>setDomainsLoading(false)); };
 
-  useEffect(() => { fetchPosts(); fetchMsgs(); fetchProjects(); fetchCerts(); fetchResume(); fetchExp(); fetchEdu(); }, []);
+  useEffect(() => { fetchPosts(); fetchMsgs(); fetchProjects(); fetchCerts(); fetchResume(); fetchExp(); fetchEdu(); fetchDomains(); }, []);
 
   // ── Submit: Blog ──────────────────────────────────────────────────────
   const submitPost = async (e) => {
@@ -302,6 +312,24 @@ export default function AdminPage() {
     fetchEdu();
   };
 
+  // ── Submit: Domains ───────────────────────────────────────────────────
+  const submitDomain = async (e) => {
+    e.preventDefault(); setDomainBusy(true); setDomainStatus(null);
+    try {
+      const isEdit = !!newDomain.id;
+      const res = await fetch('/api/domains', { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newDomain) });
+      const d = await res.json();
+      if (res.ok) { setDomainStatus({ ok: true, text: `✅ Domain "${newDomain.label}" saved!` }); setNewDomain({ value: '', label: '' }); fetchDomains(); setTimeout(()=>setDomainView('list'),1500); }
+      else setDomainStatus({ ok: false, text: `❌ ${d.error}` });
+    } catch { setDomainStatus({ ok: false, text: '❌ Network error.' }); }
+    finally { setDomainBusy(false); }
+  };
+  const deleteDomain = async (id) => {
+    if (!confirm('Delete this domain?')) return;
+    await fetch('/api/domains', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    fetchDomains();
+  };
+
   // ── Submit: Resume ────────────────────────────────────────────────────
   const saveResume = async (e) => {
     e.preventDefault(); setResumeStatus(null);
@@ -319,6 +347,7 @@ export default function AdminPage() {
     { label: 'Total Views',    value: totalViews,       icon: 'bi-eye',               color: '#16a34a', bg: '#f0fdf4' },
     { label: 'Messages',       value: messages.length,  icon: 'bi-inbox',             color: '#d97706', bg: '#fef3e2' },
     { label: 'Projects',       value: projects.length,  icon: 'bi-grid-3x3-gap',      color: '#9333ea', bg: '#fdf4ff' },
+    { label: 'Domains',        value: domains.length,   icon: 'bi-tags',              color: '#10b981', bg: '#d1fae5' },
     { label: 'Certifications', value: certs.length,     icon: 'bi-patch-check',       color: '#0e7490', bg: '#ecfeff' },
     { label: 'Experience',     value: exp.length,       icon: 'bi-briefcase',         color: '#ca8a04', bg: '#fef9c3' },
     { label: 'Education',      value: edu.length,       icon: 'bi-book',              color: '#4f46e5', bg: '#e0e7ff' },
@@ -422,6 +451,7 @@ export default function AdminPage() {
                   { label: 'Write New Post',    icon: 'bi-plus-circle',  color: '#0066cc', fn: () => { setTab('blog');     setBlogView('new'); } },
                   { label: 'Add Project',       icon: 'bi-plus-square',  color: '#9333ea', fn: () => { setTab('projects'); setProjView('new'); setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); } },
                   { label: 'Add Certification', icon: 'bi-award',        color: '#0e7490', fn: () => { setTab('certs');    setCertView('new'); } },
+                  { label: 'Add Domain',        icon: 'bi-tags',         color: '#10b981', fn: () => { setTab('domains');  setDomainView('new'); setNewDomain({ value:'',label:'' }); } },
                   { label: 'Add Experience',    icon: 'bi-briefcase',    color: '#ca8a04', fn: () => { setTab('experience'); setExpView('new'); setNewExp({ title:'',company:'',period:'',desc:'' }); } },
                   { label: 'Add Education',     icon: 'bi-book',         color: '#4f46e5', fn: () => { setTab('education');  setEduView('new'); setNewEdu({ degree:'',institution:'',period:'',desc:'' }); } },
                   { label: 'Update Resume',     icon: 'bi-cloud-upload', color: '#d97706', fn: () =>   setTab('resume') },
@@ -638,8 +668,8 @@ export default function AdminPage() {
                     <div style={{ marginBottom: '1rem' }}><label style={lbl}>Project Name *</label><Inp value={newProj.name} onChange={e => setNewProj(p => ({ ...p, name: e.target.value }))} required placeholder="e.g. Netflix Recommendation System" /></div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                       <div><label style={lbl}>Category *</label>
-                        <Sel value={newProj.category} onChange={e => { const c = PROJ_CATS.find(x => x.value === e.target.value); setNewProj(p => ({ ...p, category: e.target.value, categoryLabel: c?.label || e.target.value })); }}>
-                          {PROJ_CATS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                        <Sel value={newProj.category} onChange={e => { const c = domains.find(x => x.value === e.target.value); setNewProj(p => ({ ...p, category: e.target.value, categoryLabel: c?.label || e.target.value })); }}>
+                          {domains.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                         </Sel>
                       </div>
                       <div><label style={lbl}>Tech Stack * (comma-separated)</label><Inp value={newProj.tags} onChange={e => setNewProj(p => ({ ...p, tags: e.target.value }))} placeholder="Python, React, MongoDB…" /></div>
@@ -860,6 +890,72 @@ export default function AdminPage() {
                       {newEdu.id && <button type="button" onClick={() => { setNewEdu({ degree:'',institution:'',period:'',desc:'' }); setEduView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
                     </div>
                     <StatusBanner status={eduStatus} />
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ DOMAINS ══════════════════════════════════════════════════ */}
+          {tab === 'domains' && (
+            <div>
+              <SubTabs view={domainView} setView={setDomainView}
+                tabs={[{ id: 'list', label: `All Domains (${domains.length})`, icon: 'bi-list-ul' }, { id: 'new', label: newDomain.id ? 'Edit Domain' : 'Add Domain', icon: newDomain.id ? 'bi-pencil' : 'bi-plus-circle' }]} />
+
+              {domainView === 'list' && (
+                domainsLoading ? <Spinner /> : domains.length === 0 ? (
+                  <div style={{ ...card, textAlign: 'center', padding: '3rem', color: T.muted }}>
+                    <i className="bi bi-tags" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', color: '#cbd5e1' }}></i>
+                    No domains yet. <button onClick={() => { setDomainView('new'); setNewDomain({ value:'',label:'' }); }} style={{ color: T.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>Add one →</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    {domains.map(d => (
+                      <div key={d.id} style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.2rem' }}>{d.label}</div>
+                          <div style={{ fontSize: '0.85rem', color: T.muted, fontFamily: 'monospace', background: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: 4, display: 'inline-block' }}>{d.value}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button onClick={() => { setNewDomain(d); setDomainView('new'); }} title="Edit"
+                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button onClick={() => deleteDomain(d.id)} title="Delete"
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {domainView === 'new' && (
+                <div style={{ ...card, maxWidth: 600 }}>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newDomain.id ? 'Edit Domain' : 'Add Domain'}</h3>
+                  <form onSubmit={submitDomain}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label style={lbl}>Label (Display Name) *</label>
+                      <Inp value={newDomain.label} onChange={e => {
+                        const val = e.target.value;
+                        const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                        setNewDomain(p => ({ ...p, label: val, value: p.id ? p.value : slug }));
+                      }} required placeholder="e.g. Data Science" />
+                      <div style={{ fontSize: '0.8rem', color: T.muted, marginTop: '0.3rem' }}>How it appears in filters and UI.</div>
+                    </div>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <label style={lbl}>Value (ID) *</label>
+                      <Inp value={newDomain.value} onChange={e => setNewDomain(p => ({ ...p, value: e.target.value }))} required placeholder="e.g. data-science" />
+                      <div style={{ fontSize: '0.8rem', color: T.muted, marginTop: '0.3rem' }}>URL-friendly string. Cannot be changed easily later.</div>
+                    </div>
+                    
+                    <div>
+                      <PrimaryBtn type="submit" disabled={domainBusy}>{domainBusy ? <><i className="bi bi-hourglass-split"></i> Saving…</> : <><i className="bi bi-check2-circle"></i> {newDomain.id ? 'Update' : 'Add'}</>}</PrimaryBtn>
+                      {newDomain.id && <button type="button" onClick={() => { setNewDomain({ value:'',label:'' }); setDomainView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
+                    </div>
+                    <StatusBanner status={domainStatus} />
                   </form>
                 </div>
               )}
