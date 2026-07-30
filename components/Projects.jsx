@@ -45,6 +45,17 @@ export default function Projects() {
 
   const filtered = active === 'all' ? projects : projects.filter((p) => p.category === active);
 
+  // Dynamically generate filters based on existing projects
+  const dynamicFilters = [
+    { value: 'all', label: 'All' },
+    ...Array.from(new Set(projects.map(p => p.category)))
+      .filter(Boolean)
+      .map(cat => {
+        const proj = projects.find(p => p.category === cat);
+        return { value: cat, label: proj.categoryLabel || cat };
+      })
+  ];
+
   return (
     <section id="projects" ref={sectionRef} style={{ padding: '5rem 5%', background: '#ffffff', color: '#4a5568' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -62,7 +73,7 @@ export default function Projects() {
 
         {/* Filters */}
         <div className={`filters-container ${isVisible ? 'fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
-          {FILTERS.map((f) => (
+          {dynamicFilters.map((f) => (
             <button
               key={f.value}
               className={`filter-btn ${active === f.value ? 'active' : ''}`}
