@@ -1,45 +1,16 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 
-const EDUCATION = [
-  {
-    date: '2024 – 2028',
-    title: 'B.Tech, Computer Science & Engineering',
-    subtitle: 'BML Munjal University, Gurugram',
-    desc: 'Currently in 4th Semester. CGPA: 7.14. Focus on AI/ML and Full-Stack Development.'
-  },
-  {
-    date: '2023',
-    title: 'Senior Secondary (XII) — CBSE',
-    subtitle: 'Glorious Academy',
-    desc: 'Scored 76.00%. Science with Computer Science.'
-  },
-  {
-    date: '2021',
-    title: 'Secondary (X) — CBSE',
-    subtitle: 'BNS School',
-    desc: 'Scored 95.40% — Top academic performer.'
-  }
-];
-
-const EXPERIENCE = [
-  {
-    date: 'Apr 2026 – Present',
-    title: 'AI Intern',
-    subtitle: 'SeekMySpace · Remote',
-    desc: 'Contributing to building data-driven solutions and intelligent systems to enhance platform functionality and user experience. Working on AI pipelines, ML feature development, and product UX improvements.'
-  },
-  {
-    date: 'April 2025 – June 2025',
-    title: 'Sales Representative (Part-Time)',
-    subtitle: 'Web3Quest · Remote',
-    desc: 'Supported digital outreach and campaign execution for Web3-focused initiatives. Contributed to brand visibility and user engagement through promotional strategies and audience targeting.'
-  }
-];
-
 export default function Resume() {
   const [isVisible, setIsVisible] = useState(false);
+  const [experience, setExperience] = useState([]);
+  const [education, setEducation] = useState([]);
   const sectionRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/experience').then(r=>r.json()).then(d=>setExperience(d.experience || [])).catch(console.error);
+    fetch('/api/education').then(r=>r.json()).then(d=>setEducation(d.education || [])).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -82,14 +53,14 @@ export default function Resume() {
               Experience
             </h3>
             <div className="timeline-container">
-              {EXPERIENCE.map((item, i) => (
-                <div key={i} className="timeline-item" style={{ animationDelay: `${i * 0.15}s` }}>
+              {experience.length === 0 ? <p style={{ color: '#a0aec0', fontSize: '0.9rem' }}>No experience listed yet.</p> : experience.map((item, i) => (
+                <div key={item.id || i} className="timeline-item" style={{ animationDelay: `${i * 0.15}s` }}>
                   <div className="timeline-line"></div>
                   <div className="timeline-dot"></div>
                   <div className="timeline-card">
-                    <span className="timeline-date">{item.date}</span>
+                    <span className="timeline-date">{item.period}</span>
                     <h4 className="timeline-title">{item.title}</h4>
-                    <h5 className="timeline-subtitle">{item.subtitle}</h5>
+                    <h5 className="timeline-subtitle">{item.company}</h5>
                     <p className="timeline-desc">{item.desc}</p>
                   </div>
                 </div>
@@ -104,14 +75,14 @@ export default function Resume() {
               Education
             </h3>
             <div className="timeline-container">
-              {EDUCATION.map((item, i) => (
-                <div key={i} className="timeline-item" style={{ animationDelay: `${(i * 0.15) + 0.3}s` }}>
+              {education.length === 0 ? <p style={{ color: '#a0aec0', fontSize: '0.9rem' }}>No education listed yet.</p> : education.map((item, i) => (
+                <div key={item.id || i} className="timeline-item" style={{ animationDelay: `${(i * 0.15) + 0.3}s` }}>
                   <div className="timeline-line"></div>
                   <div className="timeline-dot"></div>
                   <div className="timeline-card">
-                    <span className="timeline-date">{item.date}</span>
-                    <h4 className="timeline-title">{item.title}</h4>
-                    <h5 className="timeline-subtitle">{item.subtitle}</h5>
+                    <span className="timeline-date">{item.period}</span>
+                    <h4 className="timeline-title">{item.degree}</h4>
+                    <h5 className="timeline-subtitle">{item.institution}</h5>
                     <p className="timeline-desc">{item.desc}</p>
                   </div>
                 </div>

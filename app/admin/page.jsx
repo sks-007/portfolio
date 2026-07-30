@@ -9,6 +9,8 @@ const NAV = [
   { id: 'blog',      label: 'Blog Posts',      icon: 'bi-file-earmark-text' },
   { id: 'projects',  label: 'Projects',        icon: 'bi-grid-3x3-gap' },
   { id: 'certs',     label: 'Certifications',  icon: 'bi-patch-check' },
+  { id: 'experience',label: 'Experience',      icon: 'bi-briefcase' },
+  { id: 'education', label: 'Education',       icon: 'bi-book' },
   { id: 'resume',    label: 'Resume',          icon: 'bi-file-person' },
 ];
 
@@ -177,6 +179,22 @@ export default function AdminPage() {
   const [certStatus, setCertStatus] = useState(null);
   const [certBusy, setCertBusy]     = useState(false);
 
+  // Experience
+  const [exp, setExp]               = useState([]);
+  const [expLoading, setExpLoading] = useState(true);
+  const [expView, setExpView]       = useState('list');
+  const [newExp, setNewExp]         = useState({ title: '', company: '', period: '', desc: '' });
+  const [expStatus, setExpStatus]   = useState(null);
+  const [expBusy, setExpBusy]       = useState(false);
+
+  // Education
+  const [edu, setEdu]               = useState([]);
+  const [eduLoading, setEduLoading] = useState(true);
+  const [eduView, setEduView]       = useState('list');
+  const [newEdu, setNewEdu]         = useState({ degree: '', institution: '', period: '', desc: '' });
+  const [eduStatus, setEduStatus]   = useState(null);
+  const [eduBusy, setEduBusy]       = useState(false);
+
   // Resume
   const [resumeUrl, setResumeUrl]   = useState('/Sachin_Kumar_Singh_Resume.pdf');
   const [newUrl, setNewUrl]         = useState('');
@@ -188,8 +206,10 @@ export default function AdminPage() {
   const fetchProjects = () => { setProjLoading(true);   fetch('/api/projects').then(r=>r.json()).then(d=>{ setProjects(d.projects||[]); setProjLoading(false); }).catch(()=>setProjLoading(false)); };
   const fetchCerts    = () => { setCertLoading(true);   fetch('/api/certifications').then(r=>r.json()).then(d=>{ setCerts(d.certifications||[]); setCertLoading(false); }).catch(()=>setCertLoading(false)); };
   const fetchResume   = () => { fetch('/api/resume').then(r=>r.json()).then(d=>setResumeUrl(d.resumeUrl||'/Sachin_Kumar_Singh_Resume.pdf')).catch(()=>{}); };
+  const fetchExp      = () => { setExpLoading(true);    fetch('/api/experience').then(r=>r.json()).then(d=>{ setExp(d.experience||[]); setExpLoading(false); }).catch(()=>setExpLoading(false)); };
+  const fetchEdu      = () => { setEduLoading(true);    fetch('/api/education').then(r=>r.json()).then(d=>{ setEdu(d.education||[]); setEduLoading(false); }).catch(()=>setEduLoading(false)); };
 
-  useEffect(() => { fetchPosts(); fetchMsgs(); fetchProjects(); fetchCerts(); fetchResume(); }, []);
+  useEffect(() => { fetchPosts(); fetchMsgs(); fetchProjects(); fetchCerts(); fetchResume(); fetchExp(); fetchEdu(); }, []);
 
   // ── Submit: Blog ──────────────────────────────────────────────────────
   const submitPost = async (e) => {
@@ -246,6 +266,42 @@ export default function AdminPage() {
     fetchCerts();
   };
 
+  // ── Submit: Experience ────────────────────────────────────────────────
+  const submitExp = async (e) => {
+    e.preventDefault(); setExpBusy(true); setExpStatus(null);
+    try {
+      const isEdit = !!newExp.id;
+      const res = await fetch('/api/experience', { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newExp) });
+      const d = await res.json();
+      if (res.ok) { setExpStatus({ ok: true, text: `✅ "${newExp.title}" ${isEdit ? 'updated' : 'added'}!` }); setNewExp({ title:'',company:'',period:'',desc:'' }); fetchExp(); setTimeout(()=>setExpView('list'),1500); }
+      else setExpStatus({ ok: false, text: `❌ ${d.error}` });
+    } catch { setExpStatus({ ok: false, text: '❌ Network error.' }); }
+    finally { setExpBusy(false); }
+  };
+  const deleteExp = async (id) => {
+    if (!confirm('Delete this experience?')) return;
+    await fetch('/api/experience', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    fetchExp();
+  };
+
+  // ── Submit: Education ─────────────────────────────────────────────────
+  const submitEdu = async (e) => {
+    e.preventDefault(); setEduBusy(true); setEduStatus(null);
+    try {
+      const isEdit = !!newEdu.id;
+      const res = await fetch('/api/education', { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newEdu) });
+      const d = await res.json();
+      if (res.ok) { setEduStatus({ ok: true, text: `✅ "${newEdu.degree}" ${isEdit ? 'updated' : 'added'}!` }); setNewEdu({ degree:'',institution:'',period:'',desc:'' }); fetchEdu(); setTimeout(()=>setEduView('list'),1500); }
+      else setEduStatus({ ok: false, text: `❌ ${d.error}` });
+    } catch { setEduStatus({ ok: false, text: '❌ Network error.' }); }
+    finally { setEduBusy(false); }
+  };
+  const deleteEdu = async (id) => {
+    if (!confirm('Delete this education?')) return;
+    await fetch('/api/education', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    fetchEdu();
+  };
+
   // ── Submit: Resume ────────────────────────────────────────────────────
   const saveResume = async (e) => {
     e.preventDefault(); setResumeStatus(null);
@@ -264,6 +320,8 @@ export default function AdminPage() {
     { label: 'Messages',       value: messages.length,  icon: 'bi-inbox',             color: '#d97706', bg: '#fef3e2' },
     { label: 'Projects',       value: projects.length,  icon: 'bi-grid-3x3-gap',      color: '#9333ea', bg: '#fdf4ff' },
     { label: 'Certifications', value: certs.length,     icon: 'bi-patch-check',       color: '#0e7490', bg: '#ecfeff' },
+    { label: 'Experience',     value: exp.length,       icon: 'bi-briefcase',         color: '#ca8a04', bg: '#fef9c3' },
+    { label: 'Education',      value: edu.length,       icon: 'bi-book',              color: '#4f46e5', bg: '#e0e7ff' },
   ];
 
   // ─────────────────────────────────────────────────────────────────────
@@ -364,6 +422,8 @@ export default function AdminPage() {
                   { label: 'Write New Post',    icon: 'bi-plus-circle',  color: '#0066cc', fn: () => { setTab('blog');     setBlogView('new'); } },
                   { label: 'Add Project',       icon: 'bi-plus-square',  color: '#9333ea', fn: () => { setTab('projects'); setProjView('new'); setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); } },
                   { label: 'Add Certification', icon: 'bi-award',        color: '#0e7490', fn: () => { setTab('certs');    setCertView('new'); } },
+                  { label: 'Add Experience',    icon: 'bi-briefcase',    color: '#ca8a04', fn: () => { setTab('experience'); setExpView('new'); setNewExp({ title:'',company:'',period:'',desc:'' }); } },
+                  { label: 'Add Education',     icon: 'bi-book',         color: '#4f46e5', fn: () => { setTab('education');  setEduView('new'); setNewEdu({ degree:'',institution:'',period:'',desc:'' }); } },
                   { label: 'Update Resume',     icon: 'bi-cloud-upload', color: '#d97706', fn: () =>   setTab('resume') },
                 ].map(a => (
                   <button key={a.label} onClick={a.fn}
@@ -678,6 +738,128 @@ export default function AdminPage() {
                     <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Credential / Badge URL</label><Inp value={newCert.link} onChange={e => setNewCert(c => ({ ...c, link: e.target.value }))} placeholder="https://…" /></div>
                     <PrimaryBtn type="submit" disabled={certBusy}>{certBusy ? <><i className="bi bi-hourglass-split"></i> Adding…</> : <><i className="bi bi-plus-circle-fill"></i> Add Certification</>}</PrimaryBtn>
                     <StatusBanner status={certStatus} />
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ EXPERIENCE ════════════════════════════════════════════════ */}
+          {tab === 'experience' && (
+            <div>
+              <SubTabs view={expView} setView={setExpView}
+                tabs={[{ id: 'list', label: `All Experience (${exp.length})`, icon: 'bi-list-ul' }, { id: 'new', label: newExp.id ? 'Edit Experience' : 'Add Experience', icon: newExp.id ? 'bi-pencil' : 'bi-plus-circle' }]} />
+
+              {expView === 'list' && (
+                expLoading ? <Spinner /> : exp.length === 0 ? (
+                  <div style={{ ...card, textAlign: 'center', padding: '3rem', color: T.muted }}>
+                    <i className="bi bi-briefcase" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', color: '#cbd5e1' }}></i>
+                    No experience yet. <button onClick={() => { setExpView('new'); setNewExp({ title:'',company:'',period:'',desc:'' }); }} style={{ color: T.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>Add one →</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {exp.map(e => (
+                      <div key={e.id} style={{ ...card, display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem' }}>{e.title}</div>
+                          <div style={{ display: 'flex', gap: '1.2rem', fontSize: '0.85rem', color: T.muted, marginBottom: '0.5rem' }}>
+                            <span><i className="bi bi-building"></i> {e.company}</span>
+                            <span><i className="bi bi-calendar3"></i> {e.period}</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: T.text, lineHeight: 1.5 }}>{e.desc}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                          <button onClick={() => { setNewExp(e); setExpView('new'); }} title="Edit"
+                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button onClick={() => deleteExp(e.id)} title="Delete"
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {expView === 'new' && (
+                <div style={{ ...card, maxWidth: 720 }}>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newExp.id ? 'Edit Experience' : 'Add Experience'}</h3>
+                  <form onSubmit={submitExp}>
+                    <div style={{ marginBottom: '1rem' }}><label style={lbl}>Job Title *</label><Inp value={newExp.title} onChange={e => setNewExp(p => ({ ...p, title: e.target.value }))} required placeholder="e.g. Software Engineer" /></div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                      <div><label style={lbl}>Company *</label><Inp value={newExp.company} onChange={e => setNewExp(p => ({ ...p, company: e.target.value }))} required placeholder="e.g. Google" /></div>
+                      <div><label style={lbl}>Period *</label><Inp value={newExp.period} onChange={e => setNewExp(p => ({ ...p, period: e.target.value }))} required placeholder="e.g. Jan 2023 - Present" /></div>
+                    </div>
+                    <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Description</label><Txa value={newExp.desc} onChange={e => setNewExp(p => ({ ...p, desc: e.target.value }))} rows={4} placeholder="What did you do there?" /></div>
+                    <div>
+                      <PrimaryBtn type="submit" disabled={expBusy}>{expBusy ? <><i className="bi bi-hourglass-split"></i> Saving…</> : <><i className="bi bi-check2-circle"></i> {newExp.id ? 'Update' : 'Add'}</>}</PrimaryBtn>
+                      {newExp.id && <button type="button" onClick={() => { setNewExp({ title:'',company:'',period:'',desc:'' }); setExpView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
+                    </div>
+                    <StatusBanner status={expStatus} />
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ EDUCATION ════════════════════════════════════════════════ */}
+          {tab === 'education' && (
+            <div>
+              <SubTabs view={eduView} setView={setEduView}
+                tabs={[{ id: 'list', label: `All Education (${edu.length})`, icon: 'bi-list-ul' }, { id: 'new', label: newEdu.id ? 'Edit Education' : 'Add Education', icon: newEdu.id ? 'bi-pencil' : 'bi-plus-circle' }]} />
+
+              {eduView === 'list' && (
+                eduLoading ? <Spinner /> : edu.length === 0 ? (
+                  <div style={{ ...card, textAlign: 'center', padding: '3rem', color: T.muted }}>
+                    <i className="bi bi-book" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', color: '#cbd5e1' }}></i>
+                    No education yet. <button onClick={() => { setEduView('new'); setNewEdu({ degree:'',institution:'',period:'',desc:'' }); }} style={{ color: T.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>Add one →</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {edu.map(e => (
+                      <div key={e.id} style={{ ...card, display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem' }}>{e.degree}</div>
+                          <div style={{ display: 'flex', gap: '1.2rem', fontSize: '0.85rem', color: T.muted, marginBottom: '0.5rem' }}>
+                            <span><i className="bi bi-building"></i> {e.institution}</span>
+                            <span><i className="bi bi-calendar3"></i> {e.period}</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: T.text, lineHeight: 1.5 }}>{e.desc}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                          <button onClick={() => { setNewEdu(e); setEduView('new'); }} title="Edit"
+                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button onClick={() => deleteEdu(e.id)} title="Delete"
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {eduView === 'new' && (
+                <div style={{ ...card, maxWidth: 720 }}>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newEdu.id ? 'Edit Education' : 'Add Education'}</h3>
+                  <form onSubmit={submitEdu}>
+                    <div style={{ marginBottom: '1rem' }}><label style={lbl}>Degree / Certificate *</label><Inp value={newEdu.degree} onChange={e => setNewEdu(p => ({ ...p, degree: e.target.value }))} required placeholder="e.g. B.Tech Computer Science" /></div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                      <div><label style={lbl}>Institution *</label><Inp value={newEdu.institution} onChange={e => setNewEdu(p => ({ ...p, institution: e.target.value }))} required placeholder="e.g. ABC University" /></div>
+                      <div><label style={lbl}>Period *</label><Inp value={newEdu.period} onChange={e => setNewEdu(p => ({ ...p, period: e.target.value }))} required placeholder="e.g. 2020 - 2024" /></div>
+                    </div>
+                    <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Description</label><Txa value={newEdu.desc} onChange={e => setNewEdu(p => ({ ...p, desc: e.target.value }))} rows={4} placeholder="Key courses, GPA, achievements…" /></div>
+                    <div>
+                      <PrimaryBtn type="submit" disabled={eduBusy}>{eduBusy ? <><i className="bi bi-hourglass-split"></i> Saving…</> : <><i className="bi bi-check2-circle"></i> {newEdu.id ? 'Update' : 'Add'}</>}</PrimaryBtn>
+                      {newEdu.id && <button type="button" onClick={() => { setNewEdu({ degree:'',institution:'',period:'',desc:'' }); setEduView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
+                    </div>
+                    <StatusBanner status={eduStatus} />
                   </form>
                 </div>
               )}
