@@ -37,7 +37,7 @@ export default function About() {
             {/* Info Grid */}
             <div className="info-grid">
               {[
-                { label: 'Degree', value: 'B.Tech, CSE (4th Sem)' },
+                { label: 'Degree', value: 'B.Tech, CSE' },
                 { label: 'University', value: 'BML Munjal University' },
                 { label: 'CGPA', value: '7.14' },
                 { label: 'Location', value: 'India' },
