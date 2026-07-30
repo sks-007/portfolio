@@ -80,6 +80,41 @@ export async function POST(req) {
   }
 }
 
+export async function PUT(req) {
+  try {
+    const { id, name, issuer, date, desc, link, icon } = await req.json();
+    if (!id || !name || !issuer) {
+      return NextResponse.json({ error: 'ID, name and issuer are required' }, { status: 400 });
+    }
+
+    const { color, iconColor } = ICON_COLORS[icon] || ICON_COLORS['bi-patch-check'];
+
+    const { data, error } = await supabase
+      .from('certifications')
+      .update({
+        icon, name, issuer, date,
+        description: desc, link,
+        color, icon_color: iconColor
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({
+      certification: {
+        id: data.id, icon: data.icon, name: data.name, issuer: data.issuer,
+        date: data.date, desc: data.description, link: data.link,
+        color: data.color, iconColor: data.icon_color
+      }
+    }, { status: 200 });
+  } catch (err) {
+    console.error('Certifications PUT error:', err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req) {
   try {
     const { id } = await req.json();

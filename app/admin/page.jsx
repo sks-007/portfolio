@@ -225,12 +225,19 @@ export default function AdminPage() {
   const submitPost = async (e) => {
     e.preventDefault(); setPostBusy(true); setPostStatus(null);
     try {
-      const res = await fetch('/api/blog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPost) });
+      const isEdit = !!newPost.id;
+      const res = await fetch('/api/blog', { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPost) });
       const d = await res.json();
-      if (res.ok) { setPostStatus({ ok: true, text: `✅ "${newPost.title}" published!` }); setNewPost({ title:'',slug:'',excerpt:'',category:'General',coverImage:'',author:'Sachin Kumar Singh',content:'' }); fetchPosts(); setTimeout(()=>setBlogView('list'),1500); }
+      if (res.ok) { setPostStatus({ ok: true, text: `✅ "${newPost.title}" ${isEdit ? 'updated' : 'published'}!` }); setNewPost({ title:'',slug:'',excerpt:'',category:'General',coverImage:'',author:'Sachin Kumar Singh',content:'' }); fetchPosts(); setTimeout(()=>setBlogView('list'),1500); }
       else setPostStatus({ ok: false, text: `❌ ${d.error}` });
     } catch { setPostStatus({ ok: false, text: '❌ Network error.' }); }
     finally { setPostBusy(false); }
+  };
+
+  const deletePost = async (id) => {
+    if (!confirm('Delete this post?')) return;
+    await fetch('/api/blog', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    fetchPosts();
   };
 
   // ── Submit: Project ───────────────────────────────────────────────────
@@ -262,9 +269,10 @@ export default function AdminPage() {
   const submitCert = async (e) => {
     e.preventDefault(); setCertBusy(true); setCertStatus(null);
     try {
-      const res = await fetch('/api/certifications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newCert) });
+      const isEdit = !!newCert.id;
+      const res = await fetch('/api/certifications', { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newCert) });
       const d = await res.json();
-      if (res.ok) { setCertStatus({ ok: true, text: `✅ "${newCert.name}" added!` }); setNewCert({ name:'',issuer:'',date:'',desc:'',link:'',icon:'bi-patch-check' }); fetchCerts(); setTimeout(()=>setCertView('list'),1500); }
+      if (res.ok) { setCertStatus({ ok: true, text: `✅ "${newCert.name}" ${isEdit ? 'updated' : 'added'}!` }); setNewCert({ name:'',issuer:'',date:'',desc:'',link:'',icon:'bi-patch-check' }); fetchCerts(); setTimeout(()=>setCertView('list'),1500); }
       else setCertStatus({ ok: false, text: `❌ ${d.error}` });
     } catch { setCertStatus({ ok: false, text: '❌ Network error.' }); }
     finally { setCertBusy(false); }
@@ -568,9 +576,24 @@ export default function AdminPage() {
                         </div>
                         <span style={{ padding: '0.2rem 0.65rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', background: cs.bg, color: cs.color, flexShrink: 0 }}>{p.category}</span>
                         <span style={{ fontSize: '0.78rem', color: T.muted, display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}><i className="bi bi-eye"></i> {p.views || 0}</span>
-                        <Link href={`/blog/${p.slug}`} target="_blank" style={{ padding: '0.3rem 0.7rem', background: T.accentBg, color: T.accent, borderRadius: 8, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                          <i className="bi bi-box-arrow-up-right"></i> View
-                        </Link>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                          <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer" title="View live"
+                            style={{ background: '#f1f5f9', borderRadius: 8, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '1rem', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#334155'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}>
+                            <i className="bi bi-box-arrow-up-right"></i>
+                          </a>
+                          <button onClick={() => { setNewPost({ id: p.id || p._id, title: p.title, slug: p.slug, excerpt: p.excerpt, content: p.content, category: p.category, coverImage: p.cover_image || p.coverImage || '', author: p.author }); setBlogView('new'); }} title="Edit post"
+                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0, transition: 'all 0.2s' }}>
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button onClick={() => deletePost(p.id || p._id)} title="Delete post"
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0, transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}>
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -579,7 +602,7 @@ export default function AdminPage() {
 
               {blogView === 'new' && (
                 <div style={{ ...card, maxWidth: 860 }}>
-                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>Write a New Article</h3>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newPost.id ? 'Edit Article' : 'Write a New Article'}</h3>
                   <form onSubmit={submitPost}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                       <div><label style={lbl}>Title *</label><Inp name="title" value={newPost.title} onChange={e => setNewPost(p => ({ ...p, title: e.target.value, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') }))} required placeholder="Article title…" /></div>
@@ -591,7 +614,8 @@ export default function AdminPage() {
                     </div>
                     <div style={{ marginBottom: '1rem' }}><label style={lbl}>Excerpt *</label><Txa value={newPost.excerpt} onChange={e => setNewPost(p => ({ ...p, excerpt: e.target.value }))} required rows={3} placeholder="Short summary shown on article cards…" /></div>
                     <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Content (Markdown) *</label><Txa value={newPost.content} onChange={e => setNewPost(p => ({ ...p, content: e.target.value }))} required rows={14} style={{ fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.6 }} placeholder={'## Introduction\n\nWrite in **Markdown**…'} /></div>
-                    <PrimaryBtn type="submit" disabled={postBusy}>{postBusy ? <><i className="bi bi-hourglass-split"></i> Publishing…</> : <><i className="bi bi-send-fill"></i> Publish Article</>}</PrimaryBtn>
+                    <PrimaryBtn type="submit" disabled={postBusy}>{postBusy ? <><i className="bi bi-hourglass-split"></i> Publishing…</> : <><i className="bi bi-send-fill"></i> {newPost.id ? 'Update' : 'Publish'} Article</>}</PrimaryBtn>
+                    {newPost.id && <button type="button" onClick={() => { setNewPost({ title:'',slug:'',excerpt:'',category:'General',coverImage:'',author:'Sachin Kumar Singh',content:'' }); setBlogView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
                     <StatusBanner status={postStatus} />
                   </form>
                 </div>
@@ -766,7 +790,8 @@ export default function AdminPage() {
 
                     <div style={{ marginBottom: '1rem' }}><label style={lbl}>Description</label><Txa value={newCert.desc} onChange={e => setNewCert(c => ({ ...c, desc: e.target.value }))} rows={3} placeholder="What this certification covers…" /></div>
                     <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Credential / Badge URL</label><Inp value={newCert.link} onChange={e => setNewCert(c => ({ ...c, link: e.target.value }))} placeholder="https://…" /></div>
-                    <PrimaryBtn type="submit" disabled={certBusy}>{certBusy ? <><i className="bi bi-hourglass-split"></i> Adding…</> : <><i className="bi bi-plus-circle-fill"></i> Add Certification</>}</PrimaryBtn>
+                    <PrimaryBtn type="submit" disabled={certBusy}>{certBusy ? <><i className="bi bi-hourglass-split"></i> Adding…</> : <><i className="bi bi-plus-circle-fill"></i> {newCert.id ? 'Update' : 'Add'} Certification</>}</PrimaryBtn>
+                    {newCert.id && <button type="button" onClick={() => { setNewCert({ name:'',issuer:'',date:'',desc:'',link:'',icon:'bi-patch-check' }); setCertView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>}
                     <StatusBanner status={certStatus} />
                   </form>
                 </div>

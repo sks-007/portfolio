@@ -61,6 +61,32 @@ export async function GET(request) {
   }
 }
 
+export async function PUT(req) {
+  try {
+    const { id, title, slug, excerpt, content, category, coverImage, author } = await req.json();
+    if (!id || !title || !slug || !excerpt || !content) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('posts')
+      .update({
+        title, slug, excerpt, content, category,
+        cover_image: coverImage, author
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ post: data }, { status: 200 });
+  } catch (err) {
+    console.error('Blog PUT error:', err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
