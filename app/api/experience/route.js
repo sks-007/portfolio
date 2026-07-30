@@ -18,7 +18,9 @@ export async function GET() {
       desc: e.description,
     }));
 
-    return NextResponse.json({ experience });
+    const res = NextResponse.json({ experience });
+    res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return res;
   } catch (err) {
     console.error('Experience GET error:', err.message);
     return NextResponse.json({ experience: [], error: err.message }, { status: 500 });

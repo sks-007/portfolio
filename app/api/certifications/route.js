@@ -37,7 +37,9 @@ export async function GET() {
       iconColor: c.icon_color,
     }));
 
-    return NextResponse.json({ certifications });
+    const res = NextResponse.json({ certifications });
+    res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return res;
   } catch (err) {
     console.error('Certifications GET error:', err.message);
     return NextResponse.json({ certifications: [], error: err.message }, { status: 500 });

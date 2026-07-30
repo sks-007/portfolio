@@ -22,7 +22,9 @@ export async function GET() {
       demo: p.demo || '',
     }));
 
-    return NextResponse.json({ projects });
+    const res = NextResponse.json({ projects });
+    res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return res;
   } catch (err) {
     console.error('Projects GET error:', err.message);
     return NextResponse.json({ projects: [], error: err.message }, { status: 500 });

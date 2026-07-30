@@ -18,7 +18,9 @@ export async function GET() {
       desc: e.description,
     }));
 
-    return NextResponse.json({ education });
+    const res = NextResponse.json({ education });
+    res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return res;
   } catch (err) {
     console.error('Education GET error:', err.message);
     return NextResponse.json({ education: [], error: err.message }, { status: 500 });
