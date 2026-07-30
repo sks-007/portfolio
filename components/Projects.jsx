@@ -5,6 +5,11 @@ const FILTERS = [
   { value: 'all', label: 'All' },
   { value: 'ai-ml', label: 'AI / ML' },
   { value: 'web', label: 'Web Dev' },
+  { value: 'mobile', label: 'Mobile App' },
+  { value: 'data-science', label: 'Data Science' },
+  { value: 'cloud', label: 'Cloud / DevOps' },
+  { value: 'software', label: 'Software Dev' },
+  { value: 'other', label: 'Other' },
 ];
 
 export default function Projects() {

@@ -13,7 +13,15 @@ const NAV = [
 ];
 
 const POST_CATS  = ['General', 'AI & ML', 'Development', 'Career', 'Cybersecurity'];
-const PROJ_CATS  = [{ value: 'ai-ml', label: 'AI / ML' }, { value: 'web', label: 'Web Dev' }, { value: 'other', label: 'Other' }];
+const PROJ_CATS  = [
+  { value: 'ai-ml', label: 'AI / ML' },
+  { value: 'web', label: 'Web Dev' },
+  { value: 'mobile', label: 'Mobile App' },
+  { value: 'data-science', label: 'Data Science' },
+  { value: 'cloud', label: 'Cloud / DevOps' },
+  { value: 'software', label: 'Software Dev' },
+  { value: 'other', label: 'Other' }
+];
 const CERT_ICONS = ['bi-patch-check', 'bi-cpu', 'bi-cloud-check', 'bi-graph-up-arrow', 'bi-filetype-py', 'bi-shield-check', 'bi-award', 'bi-stars', 'bi-mortarboard', 'bi-trophy', 'bi-robot', 'bi-code-slash'];
 
 const CAT_BADGE = {
@@ -199,9 +207,16 @@ export default function AdminPage() {
   const submitProj = async (e) => {
     e.preventDefault(); setProjBusy(true); setProjStatus(null);
     try {
-      const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProj) });
+      const isEdit = !!newProj.id;
+      const method = isEdit ? 'PUT' : 'POST';
+      const res = await fetch('/api/projects', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProj) });
       const d = await res.json();
-      if (res.ok) { setProjStatus({ ok: true, text: `✅ "${newProj.name}" added!` }); setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); fetchProjects(); setTimeout(()=>setProjView('list'),1500); }
+      if (res.ok) { 
+        setProjStatus({ ok: true, text: `✅ "${newProj.name}" ${isEdit ? 'updated' : 'added'}!` }); 
+        setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); 
+        fetchProjects(); 
+        setTimeout(()=>setProjView('list'),1500); 
+      }
       else setProjStatus({ ok: false, text: `❌ ${d.error}` });
     } catch { setProjStatus({ ok: false, text: '❌ Network error.' }); }
     finally { setProjBusy(false); }
@@ -347,7 +362,7 @@ export default function AdminPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                 {[
                   { label: 'Write New Post',    icon: 'bi-plus-circle',  color: '#0066cc', fn: () => { setTab('blog');     setBlogView('new'); } },
-                  { label: 'Add Project',       icon: 'bi-plus-square',  color: '#9333ea', fn: () => { setTab('projects'); setProjView('new'); } },
+                  { label: 'Add Project',       icon: 'bi-plus-square',  color: '#9333ea', fn: () => { setTab('projects'); setProjView('new'); setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); } },
                   { label: 'Add Certification', icon: 'bi-award',        color: '#0e7490', fn: () => { setTab('certs');    setCertView('new'); } },
                   { label: 'Update Resume',     icon: 'bi-cloud-upload', color: '#d97706', fn: () =>   setTab('resume') },
                 ].map(a => (
@@ -498,13 +513,13 @@ export default function AdminPage() {
           {tab === 'projects' && (
             <div>
               <SubTabs view={projView} setView={setProjView}
-                tabs={[{ id: 'list', label: `All Projects (${projects.length})`, icon: 'bi-list-ul' }, { id: 'new', label: 'Add Project', icon: 'bi-plus-circle' }]} />
+                tabs={[{ id: 'list', label: `All Projects (${projects.length})`, icon: 'bi-list-ul' }, { id: 'new', label: newProj.id ? 'Edit Project' : 'Add Project', icon: newProj.id ? 'bi-pencil' : 'bi-plus-circle' }]} />
 
               {projView === 'list' && (
                 projLoading ? <Spinner /> : projects.length === 0 ? (
                   <div style={{ ...card, textAlign: 'center', padding: '3rem', color: T.muted }}>
                     <i className="bi bi-grid-3x3-gap" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', color: '#cbd5e1' }}></i>
-                    No projects yet. <button onClick={() => setProjView('new')} style={{ color: T.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>Add one →</button>
+                    No projects yet. <button onClick={() => { setProjView('new'); setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); }} style={{ color: T.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>Add one →</button>
                   </div>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -518,12 +533,26 @@ export default function AdminPage() {
                           <span style={{ padding: '0.25rem 0.7rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', background: T.accentBg, color: T.accent }}>
                             {p.categoryLabel || p.category}
                           </span>
-                          <button onClick={() => deleteProj(p.id)} title="Delete project"
-                            style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0, transition: 'all 0.2s' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}>
-                            <i className="bi bi-trash"></i>
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={() => {
+                              setNewProj({
+                                ...p,
+                                tags: Array.isArray(p.tags) ? p.tags.join(', ') : p.tags
+                              });
+                              setProjView('new');
+                            }} title="Edit project"
+                              style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0, transition: 'all 0.2s' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.color = '#fff'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#3b82f6'; }}>
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button onClick={() => deleteProj(p.id)} title="Delete project"
+                              style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0, transition: 'all 0.2s' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
                         </div>
                         <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: T.text, lineHeight: 1.4, margin: '0 0 0.5rem' }}>{p.name}</h3>
                         <p style={{ fontSize: '0.85rem', color: T.muted, lineHeight: 1.6, margin: '0 0 0.75rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</p>
@@ -544,7 +573,7 @@ export default function AdminPage() {
 
               {projView === 'new' && (
                 <div style={{ ...card, maxWidth: 720 }}>
-                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>Add a New Project</h3>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newProj.id ? 'Edit Project' : 'Add a New Project'}</h3>
                   <form onSubmit={submitProj}>
                     <div style={{ marginBottom: '1rem' }}><label style={lbl}>Project Name *</label><Inp value={newProj.name} onChange={e => setNewProj(p => ({ ...p, name: e.target.value }))} required placeholder="e.g. Netflix Recommendation System" /></div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -561,7 +590,12 @@ export default function AdminPage() {
                       <div><label style={lbl}>GitHub URL</label><Inp value={newProj.github} onChange={e => setNewProj(p => ({ ...p, github: e.target.value }))} placeholder="https://github.com/…" /></div>
                     </div>
                     <div style={{ marginBottom: '1.5rem' }}><label style={lbl}>Live Demo URL</label><Inp value={newProj.demo} onChange={e => setNewProj(p => ({ ...p, demo: e.target.value }))} placeholder="https://…" /></div>
-                    <PrimaryBtn type="submit" disabled={projBusy}>{projBusy ? <><i className="bi bi-hourglass-split"></i> Adding…</> : <><i className="bi bi-plus-circle-fill"></i> Add Project</>}</PrimaryBtn>
+                    <div>
+                      <PrimaryBtn type="submit" disabled={projBusy}>{projBusy ? <><i className="bi bi-hourglass-split"></i> {newProj.id ? 'Updating…' : 'Adding…'}</> : <><i className="bi bi-check2-circle"></i> {newProj.id ? 'Update Project' : 'Add Project'}</>}</PrimaryBtn>
+                      {newProj.id && (
+                        <button type="button" onClick={() => { setNewProj({ name:'',category:'ai-ml',categoryLabel:'AI / ML',desc:'',tags:'',image:'',github:'',demo:'' }); setProjView('list'); }} style={{ marginLeft: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: T.muted, fontWeight: 700, fontSize: '0.9rem' }}>Cancel</button>
+                      )}
+                    </div>
                     <StatusBanner status={projStatus} />
                   </form>
                 </div>

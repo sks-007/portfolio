@@ -82,3 +82,39 @@ export async function DELETE(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function PUT(req) {
+  try {
+    const { id, name, category, categoryLabel, desc, tags, image, github, demo } = await req.json();
+    if (!id || !name || !category) {
+      return NextResponse.json({ error: 'ID, name, and category are required' }, { status: 400 });
+    }
+
+    const tagsArray = Array.isArray(tags)
+      ? tags
+      : (tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+    const { data, error } = await supabase
+      .from('projects')
+      .update({
+        name,
+        category,
+        category_label: categoryLabel || category,
+        description: desc || '',
+        tags: tagsArray,
+        image: image || '',
+        github: github || '',
+        demo: demo || '',
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ project: { id: data.id, name: data.name, category: data.category, categoryLabel: data.category_label, desc: data.description, tags: data.tags, image: data.image, github: data.github, demo: data.demo } }, { status: 200 });
+  } catch (err) {
+    console.error('Projects PUT error:', err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
