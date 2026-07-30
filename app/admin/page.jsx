@@ -752,6 +752,10 @@ export default function AdminPage() {
                               <i className="bi bi-arrow-up-right"></i> View
                             </a>
                           )}
+                          <button onClick={() => { setNewCert({ id: c.id, name: c.name, issuer: c.issuer, date: c.date, desc: c.desc, link: c.link, icon: c.icon }); setCertView('new'); }} title="Edit certification"
+                            style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', transition: 'all 0.2s', flexShrink: 0 }}>
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button onClick={() => deleteCert(c.id)} title="Delete certification"
                             style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', transition: 'all 0.2s' }}
                             onMouseEnter={e => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
@@ -767,7 +771,7 @@ export default function AdminPage() {
 
               {certView === 'new' && (
                 <div style={{ ...card, maxWidth: 680 }}>
-                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>Add a Certification</h3>
+                  <h3 style={{ margin: '0 0 1.5rem', fontWeight: 800 }}>{newCert.id ? 'Edit Certification' : 'Add a Certification'}</h3>
                   <form onSubmit={submitCert}>
                     <div style={{ marginBottom: '1rem' }}><label style={lbl}>Certification Name *</label><Inp value={newCert.name} onChange={e => setNewCert(c => ({ ...c, name: e.target.value }))} required placeholder="e.g. AWS Certified Developer" /></div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
