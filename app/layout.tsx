@@ -35,17 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://avgrnnahjtrnshriqoor.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://avgrnnahjtrnshriqoor.supabase.co" />
 
-        {/* Load Bootstrap Icons non-blocking: preload as style, then swap rel on load */}
-        <link
-          rel="preload"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-          as="style"
-          // @ts-ignore
-          onLoad="this.onload=null;this.rel='stylesheet'"
-        />
-        <noscript>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-        </noscript>
+        {/* Bootstrap Icons */}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
       </head>
       <body className={`${inter.variable} ${playfair.variable}`}>
         {children}
