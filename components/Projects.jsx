@@ -75,20 +75,36 @@ export default function Projects() {
               
               {/* Image Header */}
               <div className="project-img-wrap">
-                <img
-                  src={project.image}
-                  alt={project.name}
-                  className="project-img"
-                  onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                />
-                <div className="project-img-fallback">
-                  <i className="bi bi-image"></i>
-                </div>
-                <div className="project-overlay">
-                  <a href={project.demo !== '#' ? project.demo : project.github} target="_blank" rel="noopener noreferrer" className="overlay-btn">
-                    <i className="bi bi-arrow-up-right"></i>
-                  </a>
-                </div>
+                {project.image ? (
+                  <>
+                    <img
+                      src={project.image}
+                      alt={project.name}
+                      className="project-img"
+                      onError={(e) => { 
+                        e.target.style.display = 'none'; 
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; 
+                      }}
+                    />
+                    <div className="project-img-fallback" style={{ flexDirection: 'column' }}>
+                      <i className="bi bi-image" style={{ marginBottom: '0.5rem' }}></i>
+                      <span style={{ fontSize: '1rem', fontWeight: '600' }}>No image added</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="project-img-fallback" style={{ display: 'flex', flexDirection: 'column' }}>
+                    <i className="bi bi-image" style={{ marginBottom: '0.5rem' }}></i>
+                    <span style={{ fontSize: '1rem', fontWeight: '600' }}>No image added</span>
+                  </div>
+                )}
+
+                {((project.demo && project.demo !== '#') || (project.github && project.github !== '#')) && (
+                  <div className="project-overlay">
+                    <a href={project.demo && project.demo !== '#' ? project.demo : project.github} target="_blank" rel="noopener noreferrer" className="overlay-btn">
+                      <i className="bi bi-arrow-up-right"></i>
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Card Body */}
@@ -104,11 +120,13 @@ export default function Projects() {
                 </div>
 
                 <div className="project-links">
-                  <a href={project.github} target="_blank" rel="noopener noreferrer" className="btn-outline-blue">
-                    <i className="bi bi-github"></i>
-                    <span>Code</span>
-                  </a>
-                  {project.demo !== '#' && (
+                  {project.github && project.github !== '#' && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="btn-outline-blue">
+                      <i className="bi bi-github"></i>
+                      <span>Code</span>
+                    </a>
+                  )}
+                  {project.demo && project.demo !== '#' && (
                     <a href={project.demo} target="_blank" rel="noopener noreferrer" className="btn-solid-blue">
                       <span>Live Demo</span>
                       <i className="bi bi-arrow-up-right"></i>
