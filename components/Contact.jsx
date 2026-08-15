@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 
 const CONTACT_ITEMS = [
   { icon: 'bi-envelope-fill', label: 'Email', value: 'kumarsinghsachin4444@gmail.com', href: 'mailto:kumarsinghsachin4444@gmail.com', color: '#0066cc', bg: '#e6f0ff' },
-  { icon: 'bi-telephone-fill', label: 'Phone', value: '+91 9555853593', href: 'tel:+919555853593', color: '#16a34a', bg: '#f0fdf4' },
   { icon: 'bi-linkedin', label: 'LinkedIn', value: 'sachin-kumar-singh-511b86336', href: 'https://www.linkedin.com/in/sachin-kumar-singh-511b86336', color: '#0a66c2', bg: '#e8f0fe' },
   { icon: 'bi-github', label: 'GitHub', value: 'github.com/sks-007', href: 'https://github.com/sks-007', color: '#1e293b', bg: '#f1f5f9' },
 ];
